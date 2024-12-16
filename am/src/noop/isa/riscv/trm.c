@@ -24,6 +24,7 @@ void _putc(char ch) {
 }
 
 void _halt(int code) {
+  _putc(0xff);
   __asm__ volatile("mv a0, %0; .word 0x0005006b" : :"r"(code));
 
   // should not reach here during simulation
