@@ -18,6 +18,16 @@ uint64_t compare_and_swap(volatile uint64_t* addr, uint64_t old_val, uint64_t ne
   return check;
 }
 
+uint64_t atomic_add(volatile uint64_t *addr, uint64_t adder) {
+  intptr_t result;
+  asm volatile(
+    "amoadd.d %0, %1, (%2);"
+    : "=r"(result)
+    : "r"(adder), "r"(addr)
+  );
+  return result;
+}
+
 void lock(volatile uint64_t *addr) {
   asm volatile("csrci mstatus, 0x8");
   while(compare_and_swap(addr, 0, 1));
@@ -27,4 +37,31 @@ void release(volatile uint64_t *addr) {
   *addr = 0;
   asm volatile("fence");
   asm volatile("csrsi mstatus, 0x8");
+}
+
+void barrier(uint16_t threads) {
+  static volatile uint64_t barrier_var = 0;
+  static volatile uint8_t allow = 0;
+  uint64_t iam;
+  asm volatile(
+    "csrr %0, mhartid;"
+    : "=r"(iam)
+  );
+  uint8_t main_thread = 0 == iam;
+
+  if(main_thread) {
+    allow = 0;
+    asm volatile("fence");
+  }
+
+  atomic_add(&barrier_var, 1);
+  while(threads != barrier_var);
+
+  if(main_thread) {
+    barrier_var = 0;
+    allow = 1;
+    asm volatile("fence");
+  } else {
+    while(allow == 0);
+  }
 }
