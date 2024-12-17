@@ -5,7 +5,6 @@ include $(AM_HOME)/am/arch/isa/riscv64.mk
 AM_SRCS := noop/isa/riscv/trm.c \
            nemu/common/mainargs.S \
            noop/isa/riscv/perf.c \
-           noop/common/uartlite.c \
            noop/common/serial-16550.c \
            nemu/isa/riscv/cte.c \
            nemu/isa/riscv/trap.S \
@@ -18,6 +17,7 @@ AM_SRCS := noop/isa/riscv/trm.c \
            nemu/isa/riscv/boot/start.S \
            linknan/src/pwrctl.c \
            linknan/src/ioe.c \
+           linknan/src/uartlite.c
 
 CFLAGS  += -I$(AM_HOME)/am/src/nemu/include -I$(AM_HOME)/am/src/linknan/include -DISA_H=\"riscv.h\"
 
