@@ -15,7 +15,7 @@ void hart_proc() {
 
 int main() {
   uint64_t iam = riscv_mhartid();
-  printf("hart %lu boot\n", iam);
+  atomic_printf("hart %lu boot\n", iam);
   hart_proc();
   for(int i = 1; i < NUM_CORES ; i++) done_flags[i] = 0;
   done_flags[0] = 1;

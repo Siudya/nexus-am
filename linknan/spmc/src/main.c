@@ -15,7 +15,7 @@ uint8_t test() {
     riscv_fence();
     for(int j = 0; j < NUM_CORES; j++) {
       if(local_buffer[j] > global_buffer[j]) {
-        printf("[ERROR]: Consumer %lu check failed, producer is %lu, local value is %d, get %d\n", iam, j, local_buffer[j], global_buffer[j]);
+        atomic_printf("[ERROR]: Consumer %lu check failed, producer is %lu, local value is %d, get %d\n", iam, j, local_buffer[j], global_buffer[j]);
         return 1;
       }
       local_buffer[j] = global_buffer[j];
@@ -31,20 +31,20 @@ void clean_global_buffer() {
 
 int main() {
   uint64_t iam = riscv_mhartid();
-  printf("hart %lu boot\n", iam);
+  atomic_printf("hart %lu boot\n", iam);
   if(0 == iam) {
     for(int i = 1; i< NUM_CORES; i++) enable_core(i);
     clean_global_buffer();
   }
   barrier(NUM_CORES);
   
-  if(0 == iam) printf("[INFO]: Boot barrier is passed, start spmc tests ...\n");
+  if(0 == iam) atomic_printf("[INFO]: Boot barrier is passed, start spmc tests ...\n");
   
   for(int i = 0; i < ITERATION; i++) {
     if(test()) return 1;
     barrier(NUM_CORES);
     if(0 == iam) {
-      printf("[INFO]: Iteration %d ends!\n", i);
+      atomic_printf("[INFO]: Iteration %d ends!\n", i);
       clean_global_buffer();
     }
     barrier(NUM_CORES);
